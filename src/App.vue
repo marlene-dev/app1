@@ -1,3 +1,4 @@
+
 <template>
   <div class="login_container">
     <form v-if="!loggedIn" @submit.prevent="login" class="login_form">
@@ -11,14 +12,15 @@
         <input type="password" id="password" v-model="password" required />
       </div>
       <button type="submit" class="login_form_button">Login</button>
+      <p v-if="loginError" class="error_message">Incorrect email or password.</p>
     </form>
 
     <div v-if="loggedIn" class="success_message"> 
       <p class="success_message_text">
-        Login successful! Welcome, {{ email }}.
+        Login successful! Welcome, {{ loggedInEmail }}.
       </p>
+      <button v-on:click="logout" id="logout" class="login_form_button">Logout</button>
     </div>
-    <button v-if="loggedIn" v-on:click='logout' class="login_form_button">Logout</button>
   </div>
 </template>
 
@@ -29,26 +31,30 @@ export default {
     return {
       email: "",
       password: "",
+      loggedInEmail: "",
       loggedIn: false,
+      loginError: false, // New variable to track login error
     };
   },
   methods: {
-    logout(){
-      this.loggedIn = false; 
+    logout() {
+      this.loggedIn = false;
       window.dispatchEvent(
-          new CustomEvent("user-data-changed", {
-            detail: {
-              storage: "{}"
-            },
-          })
-        );
+        new CustomEvent("user-data-changed", {
+          detail: {
+            storage: "{}"
+          },
+        })
+      );
     },
     async login() {
       let result = await axios.get(
         `http://localhost:3001/users?email=${this.email}&password=${this.password}`
       );
-      if (result.status == 200 && result.data.length > 0) {
+      if (result.status === 200 && result.data.length > 0) {
+        this.loggedInEmail = this.email;
         this.loggedIn = true;
+        this.loginError = false; // Reset login error on successful login
         localStorage.setItem("user.info", JSON.stringify(result.data[0]));
         window.dispatchEvent(
           new CustomEvent("user-data-changed", {
@@ -57,10 +63,8 @@ export default {
             },
           })
         );
-        // Perform necessary actions after successful login, such as redirecting to another page
       } else {
-        this.showSuccessMessage = false;
-        // Handle login failure, such as displaying an error message
+        this.loginError = true; // Set login error to true for wrong logins
       }
 
       // Reset the form fields
