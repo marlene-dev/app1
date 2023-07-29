@@ -33,7 +33,7 @@ export default {
       password: "",
       loggedInEmail: "",
       loggedIn: false,
-      loginError: false, // New variable to track login error
+      loginError: false, 
     };
   },
   methods: {
@@ -54,7 +54,7 @@ export default {
       if (result.status === 200 && result.data.length > 0) {
         this.loggedInEmail = this.email;
         this.loggedIn = true;
-        this.loginError = false; // Reset login error on successful login
+        this.loginError = false; 
         localStorage.setItem("user.info", JSON.stringify(result.data[0]));
         window.dispatchEvent(
           new CustomEvent("user-data-changed", {
@@ -64,7 +64,7 @@ export default {
           })
         );
       } else {
-        this.loginError = true; // Set login error to true for wrong logins
+        this.loginError = true; 
       }
 
       // Reset the form fields
